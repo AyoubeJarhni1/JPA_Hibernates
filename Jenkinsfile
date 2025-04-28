@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        SONAR_TOKEN = credentials('sonar-token-id')  // Assurez-vous que le token SonarQube est correctement configuré
+        SONAR_TOKEN = credentials('jenkins-sonar')  // Assurez-vous que le token SonarQube est correctement configuré
     }
 
     stages {
