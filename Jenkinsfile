@@ -1,46 +1,26 @@
 pipeline {
-    agent any
-
-    environment {
-        SONAR_TOKEN = credentials('jenkins-sonar')  // Assurez-vous que le token SonarQube est correctement configuré
+  agent any
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '5'))
+  }
+  environment {
+    MAVEN_OPTS = "-Dmaven.wagon.http.ssl.insecure=true"
+  }
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
     }
 
-    stages {
-        stage('Checkout SCM') {
-            steps {
-                checkout scm
-            }
+    stage('Analyse SonarQube') {
+      steps {
+        script {
+          withSonarQubeEnv('Sq1') {
+            bat 'mvnw.cmd clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar'
+          }
         }
-
-        stage('Cloner le code depuis GitHub') {
-            steps {
-                // Utilisez Git pour cloner le code si nécessaire
-                git branch: 'main', url: 'https://github.com/AyoubeJarhni1/JPA_Hibernates.git'
-            }
-        }
-
-        stage('Analyser avec SonarQube') {
-            steps {
-                script {
-                    // Utilisez une commande compatible Windows ici (bat au lieu de sh)
-                    bat '''
-                    echo "Début de l'analyse SonarQube"
-                    sonar-scanner -Dsonar.projectKey=mon-projet -Dsonar.host.url=http://sonarqube.local -Dsonar.login=%SONAR_TOKEN%
-                    echo "Fin de l'analyse SonarQube"
-                    '''
-                }
-            }
-        }
-
-        stage('Post Actions') {
-            steps {
-                cleanWs()  // Nettoie l'espace de travail après le build
-            }
-        }
+      }
     }
-    post {
-        failure {
-            echo 'L\'analyse de qualité du code a échoué.'
-        }
-    }
+  }
 }
