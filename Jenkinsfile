@@ -1,45 +1,44 @@
 pipeline {
     agent any
-    tools {
-        sonarQubeScanner 'SonarQube-Scanner'  // Nom du scanner SonarQube configuré dans Jenkins
-    }
+
     environment {
-        SONARQUBE_URL = 'http://localhost:9000'  // URL de ton serveur SonarQube
-        SONAR_TOKEN = credentials('jenkins-sonar')  // Nom du secret du token SonarQube dans Jenkins
+        SONARQUBE_URL = 'http://localhost:9000'  // URL de votre serveur SonarQube
+        SONAR_TOKEN = credentials('jenkins-sonar') // Jeton d'accès SonarQube configuré dans Jenkins
     }
+
     stages {
-        stage('Checkout') {
+        stage('Cloner le code depuis GitHub') {
             steps {
-                // Vérifier que Jenkins récupère la branche 'main' du dépôt
-                checkout scm
-                // Si vous devez forcer une branche spécifique, décommentez cette ligne :
-                sh 'git checkout main' 
+                git 'https://github.com/AyoubeJarhni1/JPA_Hibernates.git'
             }
         }
-        stage('Build') {
+
+        stage('Analyser avec SonarQube') {
             steps {
-                // Compiler le projet (si nécessaire), ici avec Maven pour un projet JPA/JEE
-                sh './mvnw clean install -DskipTests'  // Exemple pour un projet Maven JPA/JEE
-            }
-        }
-        stage('SonarQube Analysis') {
-            steps {
-                // Exécuter l'analyse SonarQube
-                withSonarQubeEnv('SonarQube') {  // Nom du serveur SonarQube configuré dans Jenkins
-                    sh 'sonar-scanner -Dsonar.login=${SONAR_TOKEN}'
+                script {
+                    // Exécuter l'analyse SonarQube
+                    sh """
+                    mvn sonar:sonar \
+                        -Dsonar.host.url=${SONARQUBE_URL} \
+                        -Dsonar.login=${SONAR_TOKEN}
+                    """
                 }
             }
         }
     }
+
     post {
         always {
-            // Étape pour récupérer les résultats de SonarQube après l'analyse
-            script {
-                def scannerResults = waitForQualityGate()  // Attend les résultats de l'analyse
-                if (scannerResults.status != 'OK') {  // Vérifie si l'analyse est valide
-                    error "SonarQube analysis failed: ${scannerResults.status}"  // Échec si l'analyse est invalide
-                }
-            }
+            // Actions à effectuer après chaque exécution
+            cleanWs()
+        }
+
+        success {
+            echo 'L\'analyse de qualité du code a réussi.'
+        }
+
+        failure {
+            echo 'L\'analyse de qualité du code a échoué.'
         }
     }
 }
