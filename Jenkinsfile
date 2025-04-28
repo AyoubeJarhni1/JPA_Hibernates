@@ -13,7 +13,7 @@ pipeline {
                 // Vérifier que Jenkins récupère la branche 'main' du dépôt
                 checkout scm
                 // Si vous devez forcer une branche spécifique, décommentez cette ligne :
-                // sh 'git checkout main' 
+                sh 'git checkout main' 
             }
         }
         stage('Build') {
