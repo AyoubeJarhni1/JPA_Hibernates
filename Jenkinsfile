@@ -1,7 +1,7 @@
 pipeline {
     agent any
     tools {
-        sonarQubeScanner 'SonarQube-Scanner'  // Nom du scanner configuré dans Jenkins
+        sonarQubeScanner 'SonarQube-Scanner'  // Nom du scanner SonarQube configuré dans Jenkins
     }
     environment {
         SONARQUBE_URL = 'http://localhost:9000'  // URL de ton serveur SonarQube
@@ -10,15 +10,15 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // S'assurer que Jenkins récupère la branche 'main' du dépôt
+                // Vérifier que Jenkins récupère la branche 'main' du dépôt
                 checkout scm
                 // Si vous devez forcer une branche spécifique, décommentez cette ligne :
-                // sh 'git checkout main'
+                // sh 'git checkout main' 
             }
         }
         stage('Build') {
             steps {
-                // Compiler ton projet (si nécessaire)
+                // Compiler le projet (si nécessaire), ici avec Maven pour un projet JPA/JEE
                 sh './mvnw clean install -DskipTests'  // Exemple pour un projet Maven JPA/JEE
             }
         }
@@ -35,9 +35,9 @@ pipeline {
         always {
             // Étape pour récupérer les résultats de SonarQube après l'analyse
             script {
-                def scannerResults = waitForQualityGate()
-                if (scannerResults.status != 'OK') {
-                    error "SonarQube analysis failed: ${scannerResults.status}"
+                def scannerResults = waitForQualityGate()  // Attend les résultats de l'analyse
+                if (scannerResults.status != 'OK') {  // Vérifie si l'analyse est valide
+                    error "SonarQube analysis failed: ${scannerResults.status}"  // Échec si l'analyse est invalide
                 }
             }
         }
