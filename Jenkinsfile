@@ -15,7 +15,7 @@ pipeline {
         stage('Cloner le code depuis GitHub') {
             steps {
                 // Utilisez Git pour cloner le code si nécessaire
-                git 'https://github.com/AyoubeJarhni1/JPA_Hibernates.git'
+                git branch: 'main', url: 'https://github.com/AyoubeJarhni1/JPA_Hibernates.git'
             }
         }
 
