@@ -9,7 +9,8 @@ pipeline {
     stages {
         stage('Cloner le code depuis GitHub') {
             steps {
-git branch: 'main', url: 'https://github.com/AyoubeJarhni1/JPA_Hibernates.git'
+                // Checkout code using Jenkins' SCM feature
+                checkout scm
             }
         }
 
@@ -20,7 +21,8 @@ git branch: 'main', url: 'https://github.com/AyoubeJarhni1/JPA_Hibernates.git'
                     sh """
                     mvn sonar:sonar \
                         -Dsonar.host.url=${SONARQUBE_URL} \
-                        -Dsonar.login=${SONAR_TOKEN}
+                        -Dsonar.login=${SONAR_TOKEN} \
+                        -Dsonar.projectKey=JPA_Hibernates  // Key unique pour le projet SonarQube
                     """
                 }
             }
@@ -30,7 +32,7 @@ git branch: 'main', url: 'https://github.com/AyoubeJarhni1/JPA_Hibernates.git'
     post {
         always {
             // Actions à effectuer après chaque exécution
-            cleanWs()
+            cleanWs()  // Nettoyer l'espace de travail
         }
 
         success {
