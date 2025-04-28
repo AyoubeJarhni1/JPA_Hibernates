@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Cloner le code depuis GitHub') {
             steps {
-                git 'https://github.com/AyoubeJarhni1/JPA_Hibernates.git'
+git branch: 'main', url: 'https://github.com/AyoubeJarhni1/JPA_Hibernates.git'
             }
         }
 
